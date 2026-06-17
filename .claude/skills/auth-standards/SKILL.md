@@ -330,7 +330,8 @@ Requirements:
 
 * 4–6 digits
 * Store hashed value only
-* SHA-256 + salt
+* Use a slow key-derivation hash: PBKDF2 (≥100,000 iterations), bcrypt, or Argon2 — never a fast general-purpose hash
+* Unique random salt per user, generated at MPIN creation
 * Lock after 3 failures
 * Require password re-authentication after lockout
 
@@ -338,25 +339,59 @@ Never:
 
 * Store plaintext MPIN
 * Log MPIN values
+* Hash MPIN with SHA-256/SHA-1/MD5 alone — a 4–6 digit PIN has only 10⁴–10⁶ possible values and is brute-forceable in seconds against a fast hash, even with a salt
 
 ---
 
-## 12. Security Checklist
+## 12. Password & Sensitive Field Masking
+
+* All password, PIN and MPIN input fields must set `obscureText: true`
+* Provide a show/hide toggle only for password fields, never for MPIN/OTP entry
+* Disable copy/paste and predictive text/autofill suggestions on PIN and MPIN fields
+* Mask sensitive identifiers in the UI — account numbers, card numbers — showing only the last 4 digits (e.g. `**** **** **** 1234`)
+* Never display full account/card numbers, CVV, or MPIN in logs, crash reports, or analytics events
+
+---
+
+## 13. Login Attempt Throttling
+
+Apply the same brute-force protection to password login as MPIN:
+
+* Lock the account after 5 consecutive failed login attempts
+* Apply exponential backoff between retries after the 3rd failure
+* Lock duration: minimum 15 minutes, or require an OTP/email-based unlock
+* Return the same generic error message on lockout as on invalid credentials — never reveal whether the account exists or how many attempts remain
+
+---
+
+## 14. Device Integrity & Screen Protection
+
+* Check for root (Android) / jailbreak (iOS) at app start using a dedicated package (e.g. `flutter_jailbreak_detection`); block or warn before allowing login on a compromised device
+* Enable `FLAG_SECURE` on Android and disable screen capture/recording on iOS for screens showing balances, transaction details, card details, or MPIN entry
+* Re-validate device integrity after app resume from background, not only at cold start
+
+---
+
+## 15. Security Checklist
 
 * Store tokens only in Secure Storage
 * Use HTTPS only
 * Never log passwords
 * Never log tokens
 * Never log MPIN
+* Mask passwords, PINs, account numbers and card numbers in the UI
 * Implement session timeout
 * Use route guards
 * Use role validation
 * Limit refresh attempts
+* Limit login attempts
+* Detect root/jailbreak before allowing authentication
+* Block screenshots/screen recording on sensitive screens
 * Prevent user enumeration
 
 ---
 
-## 13. Folder Structure
+## 16. Folder Structure
 
 ```text
 lib/
@@ -376,16 +411,20 @@ Architecture details must follow the architecture skill.
 
 ---
 
-## 14. Do NOT
+## 17. Do NOT
 
 * Do not store tokens in Hive.
 * Do not store tokens in SharedPreferences.
 * Do not store plaintext MPIN.
+* Do not hash MPIN with a fast hash (SHA-256/SHA-1/MD5) instead of PBKDF2/bcrypt/Argon2.
 * Do not skip logout cleanup.
 * Do not bypass route guards.
 * Do not retry refresh endlessly.
 * Do not expose account existence.
 * Do not log secrets.
+* Do not display full account/card numbers in the UI.
+* Do not allow unlimited login attempts.
+* Do not skip root/jailbreak checks before authentication.
 * Do not enforce authorization only in the UI.
 
 ---

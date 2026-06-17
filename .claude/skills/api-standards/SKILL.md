@@ -41,6 +41,16 @@ BaseOptions(
 
 ---
 
+## 1a. Certificate Pinning
+
+- Pin the backend's certificate (or public key) on `ApiClient` for every BFSI environment (staging and production at minimum)
+- Use `dio`'s `HttpClientAdapter` with a pinned `SecurityContext`, or a dedicated package (e.g. `http_certificate_pinning`)
+- Fail closed: if pin validation fails, throw `NetworkException` — never fall back to an unpinned request
+- Store pinned certificate hashes in `ApiConstants`, never inline in the adapter
+- Rotate pins ahead of certificate expiry; ship the new pin in an app release before the old certificate expires
+
+---
+
 ## 2. Endpoint Naming
 
 - All endpoints are `static const String` in `ApiConstants`
@@ -255,3 +265,4 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 - Do not use `dynamic` as a return type in any API method
 - Do not store sensitive data (tokens, PINs) in anything other than `FlutterSecureStorage`
 - Do not log sensitive fields (passwords, tokens) via `LogInterceptor` in production
+- Do not allow API calls to succeed if certificate pin validation fails
