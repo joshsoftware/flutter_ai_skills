@@ -1,8 +1,10 @@
-# Flutter AI Skills Framework
+# Flutter AI Skills Template
 
-Reusable Flutter AI skills for Claude and Cursor.
+A ready-to-use Flutter project template with AI skills pre-installed for both Claude and Cursor.
 
-This framework standardizes:
+The project was initialized with `flutter create .`, and the skills below are already wired up for both tools — no bootstrap step required.
+
+This template standardizes:
 
 * Clean Architecture
 * Feature-first development
@@ -18,23 +20,31 @@ This framework standardizes:
 # Repository Structure
 
 ```text
-flutter/
+flutter_ai_skills/
 ├── README.md
 ├── AGENTS.md
 ├── CLAUDE.md
 │
-├── bootstrap/
-│   └── create_flutter_project.sh
+├── .claude/
+│   └── skills/
+│       ├── project-bootstrap/
+│       ├── architecture/
+│       ├── api-standards/
+│       ├── auth-standards/
+│       ├── data-storage/
+│       ├── caching/
+│       ├── unit-testing/
+│       └── flutter-pr-review/
 │
-└── skills/
-    ├── project-bootstrap/
-    ├── architecture/
-    ├── api-standards/
-    ├── auth-standards/
-    ├── data-storage/
-    ├── caching/
-    ├── unit-testing/
-    └── flutter-pr-review/
+├── .cursor/
+│   └── skills/
+│       └── ... (mirrors .claude/skills)
+│
+├── lib/
+│   └── main.dart
+├── test/
+├── android/ ios/ web/ linux/ macos/ windows/
+└── pubspec.yaml
 ```
 
 ---
@@ -55,51 +65,46 @@ flutter --version
 fvm --version
 ```
 
-The bootstrap script automatically prefers FVM and falls back to Flutter.
-
 ---
 
-# Download Bootstrap Script
+# Getting Started
+
+This repo is a Flutter project, not just a skills library. Use it as a template for new apps:
 
 ```bash
-curl -O https://raw.githubusercontent.com/joshsoftware/ai-assistant-skilles/main/flutter/bootstrap/create_flutter_project.sh
-```
-
-Make it executable:
-
-```bash
-chmod +x create_flutter_project.sh
-```
-
----
-
-# Create Cursor Project
-
-```bash
-./create_flutter_project.sh banking_app cursor
-```
-
-Open:
-
-```bash
+git clone <this-repo-url> banking_app
 cd banking_app
+flutter pub get
+```
+
+Cloning only renames the folder — the project is still identified as `flutter_ai_skills` everywhere else (`pubspec.yaml` name, Android `applicationId`, iOS bundle identifier, desktop app names, etc.). To actually rename the app, use the [`rename`](https://pub.dev/packages/rename) package:
+
+```bash
+dart pub global activate rename
+rename setAppName --value "Banking App"
+rename setBundleId --value "com.example.banking_app"
+```
+
+Or update these manually if you prefer not to install the tool:
+
+* `pubspec.yaml` → `name:`
+* `android/app/build.gradle` → `applicationId`
+* `ios/Runner.xcodeproj` / `Info.plist` → bundle identifier
+* `linux/`, `macos/`, `windows/` → executable/display name
+
+## Open with Cursor
+
+```bash
 cursor .
 ```
 
----
-
-# Create Claude Project
+## Open with Claude
 
 ```bash
-./create_flutter_project.sh banking_app claude
-```
-
-Open:
-
-```bash
-cd banking_app
 claude
 ```
+
+Both tools pick up their respective skills automatically — Cursor from `.cursor/skills/`, Claude from `.claude/skills/` (driven by `CLAUDE.md` at the project root).
 
 ---
 
@@ -239,7 +244,8 @@ Review current branch changes
 The architecture specification is defined in:
 
 ```text
-skills/architecture/SKILL.md
+.claude/skills/architecture/SKILL.md
+.cursor/skills/architecture/SKILL.md
 ```
 
 This is the source of truth for:
